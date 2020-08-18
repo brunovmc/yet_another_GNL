@@ -10,68 +10,70 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdio.h>
 #include "get_next_line.h"
 
-
-// char	*ft_substr(char *s, int start, size_t len)
-// {
-// 	char	*dest;
-//
-// 	if (s == NULL)
-// 		return (NULL);
-// 	dest = (char *)malloc(sizeof(char) * len + 1);
-// 	if (dest == NULL)
-// 		return (NULL);
-// 	len = (start < ft_strlen(s)) ? len : 0;
-// 	ft_memcpy(dest, s + start, len);
-// 	dest[len] = '\0';
-// 	return (dest);
-// }
-int     get_next_line(int fd, char **line)
+int		newline(char *s_line)
 {
-    //static char *schar;
-    char        buf[BUFFER_SIZE + 1];
-    char        *tmp;
-    static char        *off;
-    int         rd;
-    int         i;
-    int         j;
+	int	i;
 
-    buf[BUFFER_SIZE + 1] = '\0';
-    rd = read(fd, buf, BUFFER_SIZE);
-    if (fd < 0 || line == NULL || BUFFER_SIZE < 1 )
+	i = 0;
+	if (!s_line)
 		return (-1);
-    i = 0;
-    while (buf[i] != '\n' && buf[i] != '\0')
-        i++;
-    tmp = malloc(sizeof(char) * i + 1);
-    tmp[i + 1] = '\0';
-    j = i;
-    while (i >= 0)
-    {
-        tmp[i] = buf[i];
-        i--;
-    }
-    off = malloc(sizeof(char) * ((BUFFER_SIZE + 1) - j));
-    while (buf[j] != '\0')
-    {
-        off[0 + i++] = buf[j];
-        j++;
-        if(buf[j] == '\n')
-            break ;
-    }
-    printf("off = %s\n", off);
-    printf("i = %d\n", i);
-    if(rd > 0)
-    {
-        if (*line != NULL)
-        {
-                *line = off;
-            return (1);
-        }
-        *line = tmp;
-        return (1);
-    }
-    return (0);
+	while (s_line[i])
+	{
+		if (s_line[i] == '\n')
+			return (i);
+		i++;
+	}
+	return (-1);
+}
+
+char	*cleanline(char **line, char *s_line, int j)
+{
+	char	*l_temp;
+
+	if (j >= 0)
+	{
+		s_line[j] = '\0';
+		*line = (char*)ft_calloc(ft_strlen(s_line) + 1, sizeof(char));
+		l_temp = (char*)ft_calloc(ft_strlen(&s_line[j + 1]) + 1, sizeof(char));
+		ft_strlcpy(*line, s_line, ft_strlen(s_line) + 1);
+		ft_strlcpy(l_temp, &s_line[j + 1], ft_strlen(&s_line[j + 1]) + 1);
+		free(s_line);
+		s_line = NULL;
+		return (l_temp);
+	}
+	*line = (char*)ft_calloc(ft_strlen(s_line) + 1, sizeof(char));
+	ft_strlcpy(*line, s_line, ft_strlen(s_line) + 1);
+	free(s_line);
+	s_line = NULL;
+	return (s_line);
+}
+
+int		get_next_line(int fd, char **line)
+{
+	static char		*s_line;
+	char			*l_buffer;
+	register int	result;
+
+	if (!line || fd < 0 || BUFFER_SIZE < 1)
+		return (-1);
+	result = 1;
+	*line = NULL;
+	l_buffer = (char *)ft_calloc((BUFFER_SIZE + 1), sizeof(char));
+	if (!s_line)
+		s_line = (char *)ft_calloc((BUFFER_SIZE + 1), sizeof(char));
+	while (newline(s_line) == -1 && result >= 1 && result <= BUFFER_SIZE)
+	{
+		result = read(fd, l_buffer, BUFFER_SIZE);
+		if (result >= 1 && result <= BUFFER_SIZE && s_line)
+			s_line = ft_strjoin(s_line, l_buffer);
+		ft_bzero(l_buffer);
+	}
+	if (result >= 0 && result <= BUFFER_SIZE)
+		s_line = cleanline(line, s_line, newline(s_line));
+	free(l_buffer);
+	if (result >= 1 && result <= BUFFER_SIZE)
+		return (1);
+	return (result == 0 ? 0 : -1);
 }

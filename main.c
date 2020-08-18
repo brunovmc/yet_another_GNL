@@ -27,6 +27,8 @@ int		main(void)
 			printf("size = %d\n", size);
 			printf("line = %s<\n", line[0]);
 		}
+		printf("size = %d\n", size);
+		printf("line = %s<\n", line[0]);
 	}
 	return (0);
 }

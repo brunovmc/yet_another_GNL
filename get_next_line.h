@@ -16,6 +16,14 @@
 # include <unistd.h>
 # include <fcntl.h>
 
+int		newline(char *s_line);
+char	*cleanline(char **line, char *s_line, int j);
 int		get_next_line(int fd, char **line);
+int		ft_strlen(char *s);
+void	ft_bzero(char *str);
+void	*ft_calloc(size_t count, size_t size);
+char	*ft_strjoin(char *s1, char *s2);
+size_t	ft_strlcpy(char *dst, char *src, size_t dstsize);
+
 
 #endif
